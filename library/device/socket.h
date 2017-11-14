@@ -107,8 +107,10 @@ int32 TCPSendCHK(uint8 s);
 int32 TCPRecv(uint8 s, int8 *buf, uint16 len);
 int8  UDPOpen(uint8 s, uint16 port);
 int8  UDPClose(uint8 s);
+int32 UDPWrite(uint8 s, const int8 *buf, uint16 len);
 int32 UDPSend(uint8 s, const int8 *buf, uint16 len, uint8 *addr, uint16 port);
 int32 UDPSendNB(uint8 s, const int8 *buf, uint16 len, uint8 *addr, uint16 port);
+int32 UDPReSendNB(uint8 s);
 int8  UDPSendCHK(uint8 s);
 int32 UDPRecv(uint8 s, int8 *buf, uint16 len, uint8 *addr, uint16 *port);
 

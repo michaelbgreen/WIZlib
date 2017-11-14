@@ -734,18 +734,15 @@ int32 UDPSend(uint8 s, const int8 *buf, uint16 len, uint8 *addr, uint16 port)
 	} while(1);
 }
 
-int32 UDPSendNB(uint8 s, const int8 *buf, uint16 len, uint8 *addr, uint16 port)
+int32 UDPWrite(uint8 s, const int8 *buf, uint16 len)
 {
-	uint8 srcip[4], snmask[4], status = 0;
+	uint8 status;
+	uint16 txfsr;
 
 	if(s > TOTAL_SOCK_NUM) {
 		ERRA("wrong socket number(%d)", s);
 		return SOCKERR_NOT_UDP;
-	} else if(len == 0 || addr == NULL) {
-		if(len == 0) ERR("Zero length");
-		else ERR("NULL Dst IP");
-		return SOCKERR_WRONG_ARG;
-	} else DBG("start");
+	}
 
 	status = getSn_SR(s);
 	if(status == SOCK_CLOSED) return SOCKERR_CLOSED;
@@ -753,7 +750,36 @@ int32 UDPSendNB(uint8 s, const int8 *buf, uint16 len, uint8 *addr, uint16 port)
 	if((IINCHIP_READ_SOCKETREG(s, WIZS_MR) & 0x0F) != Sn_MR_UDP) return SOCKERR_NOT_UDP;        
 	if(status != SOCK_UDP) return SOCKERR_NOT_UDP;
 
-	if (len > getIINCHIP_TxMAX(s)) len = getIINCHIP_TxMAX(s); // check size not to exceed MAX size.
+	txfsr = getSn_TX_FSR(s);
+	if (len > txfsr) { // check size not to exceed MAX size.
+		ERR("Out of socket tx memory");
+		return SOCKERR_WRONG_ARG;
+	}
+	if (len + txfsr == getIINCHIP_TxMAX(s)) {
+		ERR("Zero length");
+		return SOCKERR_WRONG_ARG;
+	}
+
+	send_data_processing(s, (uint8*)buf, len);	// copy data
+	
+	return RET_OK;
+}
+	
+int32 UDPSendNB(uint8 s, const int8 *buf, uint16 len, uint8 *addr, uint16 port)
+{
+	uint8 srcip[4], snmask[4], status = 0;
+	uint16 txfsr;
+	int8 result;
+
+	result = UDPWrite(s, buf, len);
+	if (result != RET_OK) {
+		return result;
+	}
+	
+	if(addr == NULL) {
+		ERR("NULL Dst IP");
+		return SOCKERR_WRONG_ARG;
+	} else DBG("start");
 
 	getSIPR(srcip);
 	getSUBR(snmask);
@@ -787,16 +813,18 @@ int32 UDPSendNB(uint8 s, const int8 *buf, uint16 len, uint8 *addr, uint16 port)
 		IINCHIP_WRITE_SOCKETREG(s, WIZS_DPORT0 + 0,(uint8)((port & 0xff00) >> 8));
 		IINCHIP_WRITE_SOCKETREG(s, WIZS_DPORT0 + 1,(uint8)(port & 0x00ff));
 
-		send_data_processing(s, (uint8*)buf, len);	// copy data
 		//SetSubnet(sn);	// for ARP Errata
 
-		//IINCHIP_WRITE(Sn_CR(s),Sn_CR_SEND);
-		//while(IINCHIP_READ(Sn_CR(s)));  // wait to process the command...
-		IINCHIP_WRITE_SOCKETREG(s, WIZS_CR, Sn_CR_SEND);
-		while(IINCHIP_READ_SOCKETREG(s, WIZS_CR));  // wait to process the command...
+		UDPReSendNB(s);
 	}
 
 	return len;
+}
+
+int32 UDPReSendNB(uint8 s)
+{
+	IINCHIP_WRITE_SOCKETREG(s, WIZS_CR, Sn_CR_SEND);
+	while(IINCHIP_READ_SOCKETREG(s, WIZS_CR));  // wait to process the command...
 }
 
 int8 UDPSendCHK(uint8 s)

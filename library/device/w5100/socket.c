@@ -654,18 +654,15 @@ int32 UDPSend(uint8 s, const int8 *buf, uint16 len, uint8 *addr, uint16 port)
 	} while(1);
 }
 
-int32 UDPSendNB(uint8 s, const int8 *buf, uint16 len, uint8 *addr, uint16 port)
+int32 UDPWrite(uint8 s, const int8 *buf, uint16 len)
 {
-	uint8 srcip[4], snmask[4], status = 0;
+	uint8 status;
 	uint16 txfsr;
-
+	
 	if(s > TOTAL_SOCK_NUM) {
 		ERRA("wrong socket number(%d)", s);
 		return SOCKERR_NOT_UDP;
-	} else if(addr == NULL) {
-		ERR("NULL Dst IP");
-		return SOCKERR_WRONG_ARG;
-	} else DBG("start");
+	} else DBG("write");
 
 	status = getSn_SR(s);
 	if(status == SOCK_CLOSED) return SOCKERR_CLOSED;
@@ -681,6 +678,27 @@ int32 UDPSendNB(uint8 s, const int8 *buf, uint16 len, uint8 *addr, uint16 port)
 		ERR("Zero length");
 		return SOCKERR_WRONG_ARG;
 	}
+
+	send_data_processing(s, (uint8*)buf, len);	// copy data
+	
+	return RET_OK;
+}
+
+int32 UDPSendNB(uint8 s, const int8 *buf, uint16 len, uint8 *addr, uint16 port)
+{
+	uint8 srcip[4], snmask[4], status = 0;
+	uint16 txfsr;
+	int8 result;
+	
+	result = UDPWrite(s, buf, len);
+	if (result != RET_OK) {
+		return result;
+	}
+	
+	if(addr == NULL) {
+		ERR("NULL Dst IP");
+		return SOCKERR_WRONG_ARG;
+	} else DBG("start");
 
 	getSIPR(srcip);
 	getSUBR(snmask);
@@ -707,13 +725,17 @@ int32 UDPSendNB(uint8 s, const int8 *buf, uint16 len, uint8 *addr, uint16 port)
 		IINCHIP_WRITE(Sn_DPORT0(s),(uint8)((port & 0xff00) >> 8));
 		IINCHIP_WRITE((Sn_DPORT0(s) + 1),(uint8)(port & 0x00ff));
 
-		send_data_processing(s, (uint8*)buf, len);	// copy data
-
-		IINCHIP_WRITE(Sn_CR(s),Sn_CR_SEND);
-		while(IINCHIP_READ(Sn_CR(s)));  // wait to process the command...
+		UDPReSendNB(s);
 	}
 
 	return len;
+}
+
+int32 UDPReSendNB(uint8 s)
+{
+	IINCHIP_WRITE(Sn_CR(s),Sn_CR_SEND);
+	while(IINCHIP_READ(Sn_CR(s)));  // wait to process the command...
+	return RET_OK;
 }
 
 int8 UDPSendCHK(uint8 s)
