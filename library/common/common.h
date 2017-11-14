@@ -117,7 +117,9 @@
 #error Duplicate definition of DEVICE
 #endif
 
-	//Todo
+#define	TOTAL_SOCK_NUM	4	// Maxmium number of socket 
+#define TOTAL_SOCK_MEM	16	// Total Tx/Rx Buffer Memory (KB)
+#include "device/w5100/w5100.h"
 
 #endif
 
