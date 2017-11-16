@@ -21,8 +21,12 @@ extern uint16 RSIZE[TOTAL_SOCK_NUM]; //< Max Rx buffer size by each channel */
 //static uint16 SBUFBASEADDRESS[MAX_SOCK_NUM]; //< Tx buffer base address by each channel */ 
 //static uint16 RBUFBASEADDRESS[MAX_SOCK_NUM]; //< Rx buffer base address by each channel */ 
 
+#if (USE_DNS == VAL_ENABLE)
 static uint8 DNS[4]={0};
+#endif
+#if (USE_DHCP == VAL_ENABLE)
 static dhcp_mode DHCP = NETINFO_STATIC;
+#endif
 static uint16 local_port = 0xC000;	// Dynamic Port: C000(49152) ~ FFFF(65535)
 
 static uint32 tcp_close_elapse[TOTAL_SOCK_NUM] = {0,};
@@ -110,6 +114,7 @@ void SetNetInfo(wiz_NetInfo *netinfo)
 		netinfo->sn[3] != 0x00) setSUBR(netinfo->sn);	// set Subnet mask
 	if(netinfo->gw[0] != 0x00 || netinfo->gw[1] != 0x00 || netinfo->gw[2] != 0x00 || 
 		netinfo->gw[3] != 0x00) setGAR(netinfo->gw);	// set Gateway address
+#if (USE_DNS == VAL_ENABLE)
 	if(netinfo->dns[0] != 0x00 || netinfo->dns[1] != 0x00 || netinfo->dns[2] != 0x00 || 
 		netinfo->dns[3] != 0x00){
 		DNS[0] = netinfo->dns[0];
@@ -117,8 +122,11 @@ void SetNetInfo(wiz_NetInfo *netinfo)
 		DNS[2] = netinfo->dns[2];
 		DNS[3] = netinfo->dns[3];
 	}
-
+#endif
+	
+#if (USE_DHCP == VAL_ENABLE)
 	if(netinfo->dhcp != 0) DHCP = netinfo->dhcp;
+#endif
 }
 
 void ClsNetInfo(netinfo_member member)
@@ -139,9 +147,11 @@ void ClsNetInfo(netinfo_member member)
 	case NI_GW_ADDR:
 		setGAR(zero);
 		break;
+#if (USE_DNS == VAL_ENABLE)
 	case NI_DNS_ADDR:
 		DNS[0] = DNS[1] = DNS[2] = DNS[3] = 0;
 		break;
+#endif
 	default:
 		ERRA("wrong member value (%d)", member);
 	}
@@ -153,11 +163,15 @@ void GetNetInfo(wiz_NetInfo *netinfo)
 	getSIPR(netinfo->ip); // get local IP address
 	getSUBR(netinfo->sn); // get subnet mask address
 	getGAR(netinfo->gw); // get gateway address
+#if (USE_DNS == VAL_ENABLE)
 	netinfo->dns[0] = DNS[0];
 	netinfo->dns[1] = DNS[1];
 	netinfo->dns[2] = DNS[2];
 	netinfo->dns[3] = DNS[3];
+#endif
+#if (USE_DHCP == VAL_ENABLE)
 	netinfo->dhcp = DHCP;
+#endif
 }
 
 void GetDstInfo(uint8 s, uint8 *dstip, uint16 *dstport)

@@ -184,6 +184,10 @@
 #define USE_DHCP	VAL_DISABLE
 #endif
 
+#ifndef USE_DNS
+#define USE_DNS		VAL_ENABLE
+#endif
+
 #if (defined(SYSTEM_LITTLE_ENDIAN) && defined(SYSTEM_BIG_ENDIAN)) || \
 	(!defined(SYSTEM_LITTLE_ENDIAN) && !defined(SYSTEM_BIG_ENDIAN))
 #error Endian define error
