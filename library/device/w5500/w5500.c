@@ -121,7 +121,7 @@ void IINCHIP_RXBUF_WRRD(uint16 addr, uint8 data)
    
    if( rdata != data )
    {
-      printf("addr:%X, data:%X, rdata:%X, ", addr, data, rdata);
+      //printf("addr:%X, data:%X, rdata:%X, ", addr, data, rdata);
       IINCHIP_ISR_DISABLE();                      // Interrupt Service Routine Disable
       IINCHIP_CSoff();                             // CS=0, SPI start 
       IINCHIP_SpiSendData((addr & 0xFF00) >> 8);   // Address byte 1
@@ -130,7 +130,7 @@ void IINCHIP_RXBUF_WRRD(uint16 addr, uint8 data)
       redata = IINCHIP_SpiSendData(0x00);            // Data read (read 1byte data) 
       IINCHIP_CSon();                             // CS=1,  SPI end      
       IINCHIP_ISR_ENABLE();                       // Interrupt Service Routine Enable      
-      printf("redata:%X \r\n", redata);
+      //printf("redata:%X \r\n", redata);
    }
 }
 
@@ -173,12 +173,11 @@ void IINCHIP_WRITE_SEQ(uint16 addr, uint8 cntl_bits, uint16 len,  uint8 * data)
   uint16 count = 0;
 #endif     
 
-#if 0
   if(len == 0)
   {
-    printf("Unexpected1 length 0\r\n"); 
+    //printf("Unexpected1 length 0\r\n"); 
+    return;
   }   
-#endif
   
    IINCHIP_ISR_DISABLE();     
    //SPI MODE I/F
@@ -218,7 +217,8 @@ void IINCHIP_READ_SEQ(uint16 addr, uint8 cntl_bits, uint16 len, uint8 * data)
     
   if(len == 0)
   {
-    printf("Unexpected2 length 0\r\n"); 
+    //printf("Unexpected2 length 0\r\n"); 
+    return;
   } 
   
   //printf("IINCHIP_READ_SEQ->addr: %X, len : %d \r\n", addr, len);
@@ -669,7 +669,7 @@ void send_data_processing(uint8 s, uint8 *data, uint16 len)
 {
   if(len == 0)
   {
-    printf("CH: %d Unexpected1 length 0\r\n", s);
+    //printf("CH: %d Unexpected1 length 0\r\n", s);
     return;
   }
   
@@ -699,7 +699,7 @@ void recv_data_processing(uint8 s, uint8 *data, uint16 len)
   
   if(len == 0)
   {
-    printf("CH: %d Unexpected2 length 0\r\n", s);
+    //printf("CH: %d Unexpected2 length 0\r\n", s);
     return;
   }
   
