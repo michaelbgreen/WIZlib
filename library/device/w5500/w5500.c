@@ -30,6 +30,7 @@
 
 uint16 SSIZE[TOTAL_SOCK_NUM]; //< Max Tx buffer size by each channel */
 uint16 RSIZE[TOTAL_SOCK_NUM]; //< Max Rx buffer size by each channel */
+uint16 SOFFSET[TOTAL_SOCK_NUM] = { 0, 0, 0, 0, 0, 0, 0, 0 }; //< Current write offset into Tx buffer by each channel */
 
 uint8 windowfull_retry_cnt[TOTAL_SOCK_NUM];
 
@@ -632,7 +633,7 @@ uint16 getSn_TX_FSR(uint8 s)
         val = (val << 8) + IINCHIP_READ_SOCKETREG(s, WIZS_TX_FSR0  + 1);
     }
   } while (val != val1);
-   return val;
+   return val - SOFFSET[s];
 }
 
 
@@ -675,9 +676,11 @@ void send_data_processing(uint8 s, uint8 *data, uint16 len)
   uint16 ptr = 0;
   ptr = IINCHIP_READ_SOCKETREG( s, WIZS_TX_WR0 );
   ptr = ((ptr & 0x00ff) << 8) + IINCHIP_READ_SOCKETREG( s, WIZS_TX_WR0  + 1);
+  ptr += SOFFSET[s];
   //printf("TX ptr : %X  ", ptr);
   IINCHIP_WRITE_TXBUF_SEQ(s, ptr, len, data);
   ptr += len;
+  SOFFSET[s] += len;
   IINCHIP_WRITE_SOCKETREG( s,WIZS_TX_WR0 ,(uint8)((ptr & 0xff00) >> 8));
   IINCHIP_WRITE_SOCKETREG( s,(WIZS_TX_WR0  + 1),(uint8)(ptr & 0x00ff));
 }

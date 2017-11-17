@@ -16,6 +16,7 @@
 
 extern uint16 SSIZE[TOTAL_SOCK_NUM]; //< Max Tx buffer size by each channel */
 extern uint16 RSIZE[TOTAL_SOCK_NUM]; //< Max Rx buffer size by each channel */
+extern uint16 SOFFSET[TOTAL_SOCK_NUM]; //  Current write offset into Tx buffer by each channel */
 
 #if (USE_DNS == VAL_ENABLE)
 static uint8 DNS[4]={0};
@@ -87,10 +88,8 @@ void device_mem_init(uint8 *tx_size, uint8 *rx_size)
 		ssum += SSIZE[i];
 		rsum += RSIZE[i];
 
-//		if (i != 0) {            // Sets base address of Tx and Rx memory for channel #1,#2,#3
-//			SBUFBASEADDRESS[i] = SBUFBASEADDRESS[i-1] + SSIZE[i-1];
-//			RBUFBASEADDRESS[i] = RBUFBASEADDRESS[i-1] + RSIZE[i-1];
-//		}
+		SOFFSET[i] = 0;
+
 	DBGA("ch = %d",i);
 	DBGA("SBUFBASEADDRESS = %d",(uint16)SBUFBASEADDRESS[i]);
 	DBGA("RBUFBASEADDRESS = %d",(uint16)RBUFBASEADDRESS[i]);
@@ -726,6 +725,8 @@ int8 UDPClose(uint8 s)
 	while(IINCHIP_READ_SOCKETREG(s, WIZS_CR));      // wait to process the command...
 	IINCHIP_WRITE_SOCKETREG(s, WIZS_IR, 0xFF);	// interrupt all clear
 
+	SOFFSET[s] = 0;
+
 	return RET_OK;
 }
 
@@ -855,6 +856,8 @@ int8 UDPSendCHK(uint8 s)
 	} else IINCHIP_WRITE_SOCKETREG(s, WIZS_IR, Sn_IR_SEND_OK);
 	//ClearSubnet();	// for ARP Errata
 
+	SOFFSET[s] = 0;
+	
 	return RET_OK;
 }
 
