@@ -273,8 +273,6 @@ uint8 IINCHIP_READ_DM(uint16 addr);
 
 void IINCHIP_RXBUF_WRRD(uint16 addr, uint8 data);
 
-uint8 getISR(uint8 s);
-void putISR(uint8 s, uint8 val);
 uint16 getIINCHIP_RxMAX(uint8 s);
 uint16 getIINCHIP_TxMAX(uint8 s);
 

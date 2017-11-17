@@ -28,20 +28,8 @@
 //#define CHIP_DEBUG
 */
 
-//static uint8 I_STATUS[TOTAL_SOCK_NUM];
-//static uint16 RMASK[MAX_SOCK_NUM]; //< Variable for Rx buffer MASK in each channel */ 
-//static uint16 SSIZE[TOTAL_SOCK_NUM]; //< Max Tx buffer size by each channel */
-//static uint16 RSIZE[TOTAL_SOCK_NUM]; //< Max Rx buffer size by each channel */
-//static uint16 SBUFBASEADDRESS[MAX_SOCK_NUM]; //< Tx buffer base address by each channel */ 
-//static uint16 RBUFBASEADDRESS[MAX_SOCK_NUM]; //< Rx buffer base address by each channel */ 
-
-
-uint8 I_STATUS[TOTAL_SOCK_NUM];
-//static uint16 RMASK[MAX_SOCK_NUM]; //< Variable for Rx buffer MASK in each channel */ 
 uint16 SSIZE[TOTAL_SOCK_NUM]; //< Max Tx buffer size by each channel */
 uint16 RSIZE[TOTAL_SOCK_NUM]; //< Max Rx buffer size by each channel */
-//static uint16 SBUFBASEADDRESS[MAX_SOCK_NUM]; //< Tx buffer base address by each channel */ 
-//static uint16 RBUFBASEADDRESS[MAX_SOCK_NUM]; //< Rx buffer base address by each channel */ 
 
 uint8 windowfull_retry_cnt[TOTAL_SOCK_NUM];
 
@@ -58,16 +46,6 @@ void init_windowfull_retry_cnt(uint8 s)
 uint8 getSn_TSR(uint8 s)
 {
    return IINCHIP_READ_SOCKETREG(s, WIZS_TSR);
-}
-
-uint8 getISR(uint8 s)
-{
-  return I_STATUS[s];
-}
-
-void putISR(uint8 s, uint8 val)
-{
-   I_STATUS[s] = val;
 }
 
 uint16 getIINCHIP_RxMAX(uint8 s)
