@@ -632,7 +632,9 @@ int32 TCPSendCHK(uint8 s)
 		return SOCKERR_BUSY;
 	//} else IINCHIP_WRITE(Sn_IR(s), Sn_IR_SEND_OK);                
 	} else IINCHIP_WRITE_SOCKETREG(s, WIZS_IR, Sn_IR_SEND_OK);
-         
+
+	SOFFSET[s] = 0;
+	
 	//txrd = IINCHIP_READ(Sn_TX_RD0(s));
 	//txrd = (txrd << 8) + IINCHIP_READ(Sn_TX_RD0(s) + 1);
 
