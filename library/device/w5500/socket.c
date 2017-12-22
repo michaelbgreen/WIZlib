@@ -255,10 +255,15 @@ uint16 GetSocketRxRecvBufferSize(uint8 s)
 
 int8 TCPServerOpen(uint8 s, uint16 port)
 {
+	uint8 status;
+
 	if(s > TOTAL_SOCK_NUM) {
 		ERRA("wrong socket number(%d)", s);
 		return SOCKERR_NOT_TCP;
-	} else DBG("start");
+	}
+	status = getSn_SR(s);
+	if(status != SOCK_CLOSED) return SOCKERR_WRONG_STATUS;
+	DBG("start");
 
 	if (port == 0) {	// if don't set the source port, set local_port number.
 		if(local_port == 0xffff) local_port = 0xc000;
@@ -266,7 +271,6 @@ int8 TCPServerOpen(uint8 s, uint16 port)
 		port = local_port;
 	}
 
-	TCPClose(s);
 	//IINCHIP_WRITE(Sn_MR(s),Sn_MR_TCP);
 	//IINCHIP_WRITE(Sn_PORT0(s),(uint8)((port & 0xff00) >> 8));
 	//IINCHIP_WRITE((Sn_PORT0(s) + 1),(uint8)(port & 0x00ff));
@@ -314,6 +318,7 @@ int8 TCPClientOpen(uint8 s, uint16 sport, uint8 *dip, uint16 dport)
 int8 TCPCltOpenNB(uint8 s, uint16 sport, uint8 *dip, uint16 dport)
 {
 	uint8 srcip[4], snmask[4];
+	uint8 status;
 
 	if(s > TOTAL_SOCK_NUM) {
 		ERRA("wrong socket number(%d)", s);
@@ -321,7 +326,10 @@ int8 TCPCltOpenNB(uint8 s, uint16 sport, uint8 *dip, uint16 dport)
 	} else if(dip == NULL) {
 		ERR("NULL Dst IP");
 		return SOCKERR_WRONG_ARG;
-	} else DBG("start");
+	}
+	status = getSn_SR(s);
+	if(status != SOCK_CLOSED) return SOCKERR_WRONG_STATUS;
+	DBG("start");
 
 	if (sport == 0) {	// if don't set the source port, set local_port number.
 		if(local_port == 0xffff) local_port = 0xc000;
@@ -329,7 +337,6 @@ int8 TCPCltOpenNB(uint8 s, uint16 sport, uint8 *dip, uint16 dport)
 		sport = local_port;
 	}
 
-	TCPClose(s);
 	//IINCHIP_WRITE(Sn_MR(s),Sn_MR_TCP);
 	//IINCHIP_WRITE(Sn_PORT0(s),(uint8)((sport & 0xff00) >> 8));
 	//IINCHIP_WRITE((Sn_PORT0(s) + 1),(uint8)(sport & 0x00ff));
