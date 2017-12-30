@@ -28,8 +28,8 @@
 //#define CHIP_DEBUG
 */
 
-uint16 SSIZE[TOTAL_SOCK_NUM]; //< Max Tx buffer size by each channel */
-uint16 RSIZE[TOTAL_SOCK_NUM]; //< Max Rx buffer size by each channel */
+uint16 SSIZE[TOTAL_SOCK_NUM] = { 2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048 }; //< Max Tx buffer size by each channel */
+uint16 RSIZE[TOTAL_SOCK_NUM] = { 2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048 }; //< Max Rx buffer size by each channel */
 uint16 SOFFSET[TOTAL_SOCK_NUM] = { 0, 0, 0, 0, 0, 0, 0, 0 }; //< Current write offset into Tx buffer by each channel */
 
 uint8 windowfull_retry_cnt[TOTAL_SOCK_NUM];
