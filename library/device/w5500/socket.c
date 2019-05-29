@@ -845,6 +845,7 @@ int32 UDPReSendNB(uint8 s)
 {
 	IINCHIP_WRITE_SOCKETREG(s, WIZS_CR, Sn_CR_SEND);
 	while(IINCHIP_READ_SOCKETREG(s, WIZS_CR));  // wait to process the command...
+	return RET_OK;
 }
 
 int8 UDPSendCHK(uint8 s)
